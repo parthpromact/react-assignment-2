@@ -10,19 +10,31 @@ const AuthProvider = dynamic(
   { ssr: false }
 );
 import { Provider } from "react-redux";
-import store from "@/stores";
+import store, { persistor } from "@/stores";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import Layout from "./layout";
+import { PersistGate } from "redux-persist/integration/react";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
-      <GoogleOAuthProvider
-        clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
+      <PersistGate
+        loading={null}
+        persistor={persistor}
+        onBeforeLift={() => {
+          console.log("App is rehydrated and before rendering!");
+        }}
       >
-        <AuthProvider>
-          <Component {...pageProps} />
-        </AuthProvider>
-      </GoogleOAuthProvider>
+        <GoogleOAuthProvider
+          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
+        >
+          <AuthProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </AuthProvider>
+        </GoogleOAuthProvider>
+      </PersistGate>
     </Provider>
   );
 }

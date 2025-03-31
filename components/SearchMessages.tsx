@@ -11,7 +11,7 @@ const SearchMessages = ({ handleSearch, selectedUser }: any) => {
     return dateObj.toLocaleString().slice(10, 26);
   };
   return (
-    <div className="fixed top-0 left-0 z-10 h-screen w-1/3 bg-gray-200 p-4 pb-16">
+    <div className="fixed top-16 left-0 z-10 w-1/3 bg-gray-200 p-4 pb-16 h-[91vh]">
       <div className="flex justify-between">
         <div className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-tr from-[#614385] to-[#516395]">
           <p>Search Messages</p>
@@ -27,7 +27,7 @@ const SearchMessages = ({ handleSearch, selectedUser }: any) => {
           </button>
         </div>
       </div>
-      <div className="my-4 bg-gradient-to-tr from-[#614385] to-[#516395] h-full overflow-y-scroll rounded-xl ">
+      <div className="my-4 bg-gradient-to-tr from-[#614385] to-[#516395] h-full overflow-y-auto rounded-xl">
         {messages && messages?.length > 0 ? (
           [...messages].reverse().map((message: any, index: number) => (
             <div

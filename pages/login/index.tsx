@@ -42,7 +42,7 @@ const Login = () => {
   // Authenticated User Try to access Login Page so redirect to Logs Page
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/logs");
+      router.push("/chat");
     }
   }, [isAuthenticated]);
 

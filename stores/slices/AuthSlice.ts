@@ -119,7 +119,7 @@ export const googleloginAsync = createAsyncThunk(
 
 // Google Sign up API Call
 export const googleSignUpAsync = createAsyncThunk(
-  "auth/google-login",
+  "auth/google-register",
   async (params: any) => {
     try {
       const response = await axios.post(

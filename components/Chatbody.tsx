@@ -10,6 +10,8 @@ import { FaEllipsisV } from "react-icons/fa";
 import { io } from "socket.io-client";
 import { setTimeout } from "timers";
 import SearchMessages from "./SearchMessages";
+import { useRouter } from "next/router";
+import CustomModal from "./common/CustomModal";
 const socket = io("http://localhost:5000");
 
 const Chatbody = ({
@@ -17,8 +19,9 @@ const Chatbody = ({
   selectedUserId,
 }: {
   isSelectedUser: boolean;
-  selectedUserId?: number;
+  selectedUserId?: number | null;
 }) => {
+  const router = useRouter();
   const dispatch = useDispatch<any>();
 
   // Redux Store States
@@ -39,7 +42,6 @@ const Chatbody = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isMain, setIsMain] = useState(true);
   const [isEditDialog, setIsEditDialog] = useState<any>(false);
-  const [toastDisplayed, setToastDisplayed] = useState(false);
 
   // Chat Container Ref Which Used for Scroll Whole Chat Body
   const chatContainerRef = useRef<any>(null); // ChatRef
@@ -119,19 +121,11 @@ const Chatbody = ({
   // Fetch Conversation as Selected User Get Changed
   useEffect(() => {
     if (selectedUserId) {
-      setToastDisplayed(false);
       setMessage("");
       setIsEdit(false);
-      // fetchConversation(1);
-    }
-  }, [selectedUserId]);
-
-  // Trigger API call when toastDisplayed becomes false
-  useEffect(() => {
-    if (!toastDisplayed && isSelectedUser) {
       fetchConversation(1);
     }
-  }, [toastDisplayed]);
+  }, [selectedUserId]);
 
   // Handle loading older messages when scrolling to top
   useEffect(() => {
@@ -181,12 +175,11 @@ const Chatbody = ({
         conversationMessages({ id: selectedUserId, page })
       );
       if (response?.payload) {
-        if (!toastDisplayed && isMain) {
+        if (isMain) {
           toast.success(
             response?.payload?.message || "Fetched messages successfully",
             { id: "messages" }
           );
-          setToastDisplayed(true);
         }
       }
     } catch (error) {
@@ -265,6 +258,17 @@ const Chatbody = ({
     }
   };
 
+  // Handle Close Delete Modal
+  const handleCloseDeleteModal = (messageId: number) => {
+    setIsModalOpenConfirm((prev: any) => ({
+      ...prev,
+      [messageId]: false,
+    }));
+    setIsModalOpen((prev: any) => ({
+      [messageId]: !prev[messageId],
+    }));
+  };
+
   // Handle Edit Message Modal
   const handleEditMessage = async (message: any) => {
     setMessage(message.content);
@@ -331,7 +335,7 @@ const Chatbody = ({
   const disMsg = prevMsgRef.current;
 
   return (
-    <div className="bg-gradient-to-bl from-[#A9F1DF] to-[#FFBBBB] h-screen w-2/3 overflow-y-hidden flex flex-col">
+    <div className="bg-gradient-to-bl from-[#A9F1DF] to-[#FFBBBB] h-[91vh] w-2/3 overflow-y-hidden flex flex-col pb-2">
       {isSelectedUser ? (
         <>
           <div className="flex items-center justify-between p-1">
@@ -345,10 +349,7 @@ const Chatbody = ({
                 searchMessages(e.target.value);
               }}
             />
-            <div
-              className="shadow-lg p-2 bg-white font-mono  font-semibold rounded-r-lg"
-              // onClick={}
-            >
+            <div className="shadow-lg p-2 bg-white font-mono  font-semibold rounded-r-lg">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 50 50"
@@ -383,7 +384,7 @@ const Chatbody = ({
                           <button
                             onClick={() =>
                               setIsModalOpen((prev: any) => ({
-                                ...prev,
+                                // ...prev,
                                 [message.id]: !prev[message.id],
                               }))
                             }
@@ -391,10 +392,10 @@ const Chatbody = ({
                             <FaEllipsisV className=" hover:scale-110 cursor-pointer " />
                           </button>
                           {isModalOpen[message.id] && (
-                            <div className="absolute right-0 mt-2 w-36 bg-blue-950 hover:bg-gray-800rounded-md shadow-lg z-100">
+                            <div className="absolute right-0 mt-2 w-36 bg-blue-950  rounded-md shadow-lg z-100">
                               <ul className="py-1">
                                 <li
-                                  className="px-4 py-1 cursor-pointer text-md"
+                                  className="px-4 py-2 cursor-pointer text-md hover:bg-gray-800"
                                   onClick={() => {
                                     setIsEditDialog(true);
                                     handleEditMessage(message);
@@ -413,55 +414,43 @@ const Chatbody = ({
                                 >
                                   Delete
                                 </li>
-                                {isModalOpenConfirm[message.id] && (
-                                  <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 backdrop-blur-xs z-100">
-                                    <div className="bg-blue-950 w-80 rounded-md shadow-lg p-4">
-                                      <div className="flex flex-col items-center py-2">
-                                        <p className="text-sm text-center">
-                                          Are you sure you want to delete this
-                                          message?
-                                        </p>
-                                        <div className="flex gap-2 mt-4">
-                                          <button
-                                            className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer"
-                                            onClick={() => {
-                                              setIsModalOpenConfirm({
-                                                ...isModalOpenConfirm,
-                                                [message.id]: false,
-                                              });
-                                              setIsModalOpen((prev: any) => ({
-                                                ...prev,
-                                                [message.id]: !prev[message.id],
-                                              }));
-                                            }}
-                                          >
-                                            Cancel
-                                          </button>
-                                          <button
-                                            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 cursor-pointer"
-                                            onClick={() => {
-                                              handleDeleteMessage(message);
-                                              setIsModalOpenConfirm({
-                                                ...isModalOpenConfirm,
-                                                [message.id]: false,
-                                              });
-                                              setIsModalOpenConfirm({
-                                                ...isModalOpenConfirm,
-                                                [message.id]: false,
-                                              });
-                                              setIsModalOpen((prev: any) => ({
-                                                ...prev,
-                                                [message.id]: !prev[message.id],
-                                              }));
-                                            }}
-                                          >
-                                            Delete
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
+
+                                {/* Delete Modal*/}
+                                <CustomModal
+                                  isOpen={
+                                    isModalOpenConfirm[message.id] || false
+                                  }
+                                  onClose={() =>
+                                    handleCloseDeleteModal(message.id)
+                                  }
+                                  onAccept={() => {
+                                    handleDeleteMessage(message);
+                                    handleCloseDeleteModal(message.id);
+                                  }}
+                                  modalText={
+                                    "Are you sure you want to delete this message?"
+                                  }
+                                  btn1={"Cancel"}
+                                  btn2={"Delete"}
+                                />
+
+                                {/* Edit Modal*/}
+                                <CustomModal
+                                  isOpen={isEditDialog}
+                                  onClose={() => {
+                                    setIsEditDialog(false);
+                                    setIsEdit(false);
+                                    setMessage("");
+                                  }}
+                                  onAccept={() => {
+                                    setIsEditDialog(false);
+                                  }}
+                                  modalText={
+                                    "Are you sure you want to edit this message?"
+                                  }
+                                  btn1={"Cancel"}
+                                  btn2={"Edit"}
+                                />
                               </ul>
                             </div>
                           )}
@@ -493,37 +482,6 @@ const Chatbody = ({
             )}
           </div>
           <div className="flex px-2 gap-2">
-            {isEditDialog && (
-              <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 backdrop-blur-xs z-100">
-                <div className="bg-blue-950 w-80 rounded-md shadow-lg p-4">
-                  <div className="flex flex-col items-center py-2">
-                    <p className="text-sm text-center text-white">
-                      Are you sure you want to edit this Message?
-                    </p>
-                    <div className="flex gap-2 mt-4">
-                      <button
-                        className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 cursor-pointer text-xs"
-                        onClick={() => {
-                          setIsEditDialog(false);
-                          setIsEdit(false);
-                          setMessage("");
-                        }}
-                      >
-                        Decline
-                      </button>
-                      <button
-                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 cursor-pointer text-xs"
-                        onClick={() => {
-                          setIsEditDialog(false);
-                        }}
-                      >
-                        Accept
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
             <input
               type="text"
               value={message}
@@ -532,7 +490,7 @@ const Chatbody = ({
               onChange={(e) => setMessage(e.target.value)}
             />
             <button
-              className="rounded-xl shadow-lg px-10 py-2 bg-gradient-to-tl text-white font-mono  from-[#614385] to-[#516395] hover:scale-105 font-semibold cursor-pointer"
+              className="rounded-xl shadow-lg px-10 py-2 bg-gradient-to-tl text-white font-mono from-[#614385] to-[#516395] hover:scale-105 font-semibold cursor-pointer"
               onClick={messageSent}
             >
               {isEdit ? "Edit" : "Send"}

@@ -82,7 +82,6 @@ const LogsPage = () => {
           },
         }
       );
-      console.log("🚀 ~ fetchLogs ~ res:", res);
 
       if (res?.status == 200) {
         toast.success(res?.data?.message || "Log fetched successfully");
@@ -145,8 +144,12 @@ const LogsPage = () => {
     }
   };
 
+  // const handleClick = () => {
+  //   router.push("/chat")
+  // }
+
   return (
-    <div className="w-screen h-screen bg-gradient-to-bl from-[#A9F1DF] to-[#FFBBBB]">
+    <div className="w-screen h-[91vh] bg-gradient-to-bl from-[#A9F1DF] to-[#FFBBBB]">
       <div className="container mx-auto p-4">
         <div className="flex justify-between">
           <div>
@@ -155,17 +158,17 @@ const LogsPage = () => {
             </h1>
           </div>
           <div>
-            <button
+            {/* <button
               className="flex bg-gradient-to-br from-[#614385] to-[#516395] text-white p-3 font-semibold rounded-md hover:scale-105 cursor-pointer group"
               style={{ transition: "all 0.2s ease-in-out" }}
             >
-              <Link href="/chat">Go to Chat</Link>
+              <button onClick={() => handleClick()}>Go to Chat</button>
               <div className="">
                 <p className="h-4 w-4 ml-2 group-hover:translate-x-1 text-lg">
                   →
                 </p>
               </div>
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -302,7 +305,7 @@ const LogsPage = () => {
             </table>
           </div>
 
-          <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+          <div className="max-h-[calc(91vh-300px)] overflow-y-auto">
             <table className="w-full text-sm text-left  text-gray-500">
               <tbody className="bg-white">
                 {loading ? (

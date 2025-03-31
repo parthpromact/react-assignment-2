@@ -18,8 +18,8 @@ const ChatConversation = () => {
 
   // Memoize the user Id on Page Change Which will help in message flickering and avoiding re-renders
   const id = useMemo(() => {
-    const paramId = params?.id ? Number(params.id) : null;
-    if (paramId !== null) {
+    const paramId = params?.id ? Number(params?.id) : null;
+    if (paramId !== null && paramId != 0) {
       localStorage.setItem("selectedUserId", paramId.toString());
       return paramId;
     }
@@ -36,14 +36,12 @@ const ChatConversation = () => {
     }
   }, [id, dispatch]);
 
-  console.log("selectedId", selectedId);
-
   return (
     <div className="flex">
       <Toaster />
       <>
-        <Userlist users={users} selectedUser={Number(selectedId)} />
-        <Chatbody isSelectedUser={true} selectedUserId={Number(selectedId)} />
+        <Userlist users={users} selectedUser={params &&params?.id !== "0" || undefined || null ? Number(params.id) : selectedId} />
+        <Chatbody isSelectedUser={true} selectedUserId={params && params?.id !== "0"  || undefined || null ? Number(params.id) : selectedId} />
       </>
     </div>
   );
